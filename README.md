@@ -79,8 +79,83 @@ After it has been downloaded you will need to restart Home Assistant.
 
 This custom integration supports HomeAssistant versions 2024.8.3 or newer.
 
-> [!NOTE]
-> Starting with version 6.0.0, the integration domain has been changed from `illuminance` to `ha_illuminance` to avoid conflicting with the built-in Home Assistant Core system component introduced in HA 2026.4 (which displayed the warning *"Custom integration that replaces a Core component"*).
+---
+
+## Migration from the old integration
+
+> ⚠️ **Important**: Starting with version 6.0.0, this integration uses the `ha_illuminance` domain instead of `illuminance` to resolve the conflict with Home Assistant Core (*"Custom integration that replaces a Core component"*).
+> If you had the old integration installed (domain `illuminance`), follow the steps below to migrate.
+
+### Step 1 — Note your current configuration
+
+Before making any changes, note down the following information:
+
+- The **names**, **weather data entities**, and **modes** (`normal`, `simple`, `irradiance`) of your existing illuminance sensors.
+- If you use YAML, locate your `illuminance:` block in `configuration.yaml`.
+- The **services** called in your automations (e.g. `illuminance.reload`).
+
+### Step 2 — Update YAML configuration (if applicable)
+
+If you configured your sensors in `configuration.yaml`, update the root key from `illuminance:` to `ha_illuminance:`:
+
+```yaml
+# Before:
+# illuminance:
+#   - unique_id: outdoor_light
+#     entity_id: weather.home
+
+# After:
+ha_illuminance:
+  - unique_id: outdoor_light
+    name: Outdoor Illuminance
+    entity_id: weather.home
+    mode: normal
+    scan_interval: 5
+```
+
+### Step 3 — Remove the old HACS repository (if installed via HACS)
+
+1. In Home Assistant, go to **HACS → Integrations**.
+2. Find **Illuminance** (the old version from `pnbruckner/ha-illuminance`).
+3. Click the three dots `⋮` → **Remove** (or **Uninstall**).
+4. Do **not** restart Home Assistant yet.
+
+*(If you installed manually, delete the folder `<config>/custom_components/illuminance` from your configuration directory.)*
+
+### Step 4 — Add this repository in HACS
+
+If not already done:
+
+1. In **HACS**, click the three dots `⋮` in the top right corner.
+2. Select **Custom repositories**.
+3. In the **Repository** field, enter: `https://github.com/4lexjm/ha-illuminance`
+4. In the **Category** field, select: `Integration`.
+5. Click **Add**.
+
+### Step 5 — Install the new integration
+
+1. In **HACS → Integrations**, search for **Illuminance** (or `ha-illuminance`).
+2. Click **Download** (version 6.0.0 or later).
+3. **Restart Home Assistant**.
+
+### Step 6 — Verify configuration & Automatic migration
+
+- **Automatic migration**: On startup, the integration will automatically detect and migrate any existing UI config entries from the old `illuminance` domain to `ha_illuminance`, preserving your sensor configurations and unique IDs.
+- **UI Configuration (manual fallback)**: If you prefer to re-create them manually or if you are setting up new sensors, go to **Settings → Devices & Services → Add Integration**, search for **Illuminance**, and enter your options.
+- Verify that your sensor entities are active in **Settings → Devices & Services → Entities**.
+
+### Step 7 — Update your automations and dashboards
+
+Entity IDs should be preserved (e.g. `sensor.illuminance` or `sensor.outdoor_illuminance`). Check and update:
+
+- **Entities** in your Lovelace dashboards if any entity ID changed.
+- **Services** in your automations and scripts:
+
+  | Old service | New service |
+  |---|---|
+  | `illuminance.reload` | `ha_illuminance.reload` |
+
+---
 
 ## Services
 
