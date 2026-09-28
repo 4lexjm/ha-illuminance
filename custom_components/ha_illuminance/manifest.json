@@ -1,0 +1,12 @@
+{
+  "domain": "ha_illuminance",
+  "name": "Illuminance",
+  "codeowners": ["@4lexjm", "@pnbruckner"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/4lexjm/ha-illuminance/blob/master/README.md",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/4lexjm/ha-illuminance/issues",
+  "requirements": [],
+  "version": "6.0.0"
+}

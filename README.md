@@ -1,4 +1,5 @@
-# <img src="https://brands.home-assistant.io/illuminance/icon.png" alt="Sun2 Sensor" width="50" height="50"/> Illuminance Sensor
+# Illuminance Sensor
+
 Creates a `sensor` entity that estimates outdoor illuminance based on either sun elevation or time of day.
 In either case, the value can be further adjusted based on current weather conditions or cloud coverage obtained from another, existing entity.
 
@@ -47,13 +48,13 @@ Or you can manually install the software.
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/)
 
 1. Add this repo as a [custom repository](https://hacs.xyz/docs/faq/custom_repositories/):
-   It should then appear as a new integration. Click on it. If necessary, search for "illuminance".
+   It should then appear as a new integration. Click on it. If necessary, search for "illuminance" or "ha_illuminance".
    ```text
-   https://github.com/pnbruckner/ha-illuminance
+   https://github.com/4lexjm/ha-illuminance
    ```
    Or use this button:
   
-   [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=pnbruckner&repository=ha-illuminance&category=integration)
+   [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=4lexjm&repository=ha-illuminance&category=integration)
 
 1. Download the integration using the appropriate button.
 
@@ -62,8 +63,8 @@ Or you can manually install the software.
 <details>
 <summary>Manual Installation</summary>
 
-Place a copy of the files from [`custom_components/illuminance`](custom_components/illuminance)
-in `<config>/custom_components/illuminance`,
+Place a copy of the files from [`custom_components/ha_illuminance`](custom_components/ha_illuminance)
+in `<config>/custom_components/ha_illuminance`,
 where `<config>` is your Home Assistant configuration directory.
 
 >__NOTE__: When downloading, make sure to use the `Raw` button from each file's page.
@@ -78,17 +79,31 @@ After it has been downloaded you will need to restart Home Assistant.
 
 This custom integration supports HomeAssistant versions 2024.8.3 or newer.
 
+> [!NOTE]
+> Starting with version 6.0.0, the integration domain has been changed from `illuminance` to `ha_illuminance` to avoid conflicting with the built-in Home Assistant Core system component introduced in HA 2026.4 (which displayed the warning *"Custom integration that replaces a Core component"*).
+
 ## Services
 
-### `illuminance.reload`
+### `ha_illuminance.reload`
 
-Reloads Illuminance from the YAML-configuration. Also adds `ILLUMINANCE` to the Developers Tools -> YAML page.
+Reloads Illuminance from the YAML-configuration. Also adds `HA_ILLUMINANCE` to the Developers Tools -> YAML page.
 
 ## Configuration variables
 
-A list of configuration options for one or more sensors. Each sensor is defined by the following options.
+A list of configuration options for one or more sensors. Each sensor can be configured in the UI (**Settings -> Devices & Services -> Add Integration -> Illuminance**) or via YAML in `configuration.yaml`.
 
-> Note: This defines configuration via YAML. However, the same sensors can be added in the UI.
+### YAML Configuration Example
+
+```yaml
+ha_illuminance:
+  - unique_id: outdoor_illuminance
+    name: Outdoor Illuminance
+    entity_id: weather.home
+    mode: normal
+    scan_interval: 5
+```
+
+### Options
 
 Key | Optional | Description
 -|-|-

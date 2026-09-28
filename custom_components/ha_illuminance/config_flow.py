@@ -108,7 +108,7 @@ class IlluminanceFlow(ConfigEntryBaseFlow):
 
 
 class IlluminanceConfigFlow(ConfigFlow, IlluminanceFlow, domain=DOMAIN):
-    """Sun2 config flow."""
+    """Illuminance config flow."""
 
     VERSION = 1
 
@@ -142,10 +142,13 @@ class IlluminanceConfigFlow(ConfigFlow, IlluminanceFlow, domain=DOMAIN):
     async def async_step_import(self, data: dict[str, Any]) -> ConfigFlowResult:
         """Import config entry from configuration."""
         title = data.pop(CONF_NAME)
-        # Convert from timedelta to float in minutes.
-        data[CONF_SCAN_INTERVAL] = (
-            cast(timedelta, data[CONF_SCAN_INTERVAL]).total_seconds() / 60
-        )
+        # Convert from timedelta to float in minutes if needed.
+        if isinstance(data[CONF_SCAN_INTERVAL], timedelta):
+            data[CONF_SCAN_INTERVAL] = (
+                data[CONF_SCAN_INTERVAL].total_seconds() / 60
+            )
+        else:
+            data[CONF_SCAN_INTERVAL] = float(data[CONF_SCAN_INTERVAL])
         if existing_entry := await self.async_set_unique_id(data.pop(CONF_UNIQUE_ID)):
             self.hass.config_entries.async_update_entry(
                 existing_entry, title=title, options=data
@@ -181,7 +184,7 @@ class IlluminanceConfigFlow(ConfigFlow, IlluminanceFlow, domain=DOMAIN):
 
 
 class IlluminanceOptionsFlow(OptionsFlowWithConfigEntry, IlluminanceFlow):
-    """Sun2 integration options flow."""
+    """Illuminance integration options flow."""
 
     async def async_step_done(
         self, _: dict[str, Any] | None = None

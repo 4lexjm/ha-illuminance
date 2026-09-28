@@ -3,12 +3,14 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Coroutine
+import logging
 from typing import Any
 
 import voluptuous as vol
 
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import (
+    CONF_NAME,
     CONF_UNIQUE_ID,
     EVENT_CORE_CONFIG_UPDATE,
     SERVICE_RELOAD,
@@ -21,8 +23,10 @@ from homeassistant.helpers.service import async_register_admin_service
 from homeassistant.helpers.sun import get_astral_location
 from homeassistant.helpers.typing import ConfigType
 
-from .const import DOMAIN
+from .const import DOMAIN, OLD_DOMAIN
 from .sensor import ILLUMINANCE_SCHEMA, LOC_ELEV
+
+_LOGGER = logging.getLogger(__name__)
 
 _ILLUMINANCE_SCHEMA = vol.Schema(
     ILLUMINANCE_SCHEMA
@@ -40,12 +44,45 @@ PLATFORMS = [Platform.SENSOR]
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Set up composite integration."""
-    # An Illuminance service was created in previous versions. Remove it if it exists,
-    # since it is no longer useful and it is not created anymore.
+    """Set up illuminance integration."""
+    # Clean up legacy services/devices from previous versions if they exist.
     dev_reg = dr.async_get(hass)
-    if device := dev_reg.async_get_device({(DOMAIN, DOMAIN)}):
-        dev_reg.async_remove_device(device.id)
+    for dom in (DOMAIN, OLD_DOMAIN):
+        if device := dev_reg.async_get_device({(dom, dom)}):
+            dev_reg.async_remove_device(device.id)
+
+    # Migrate legacy config entries from previous domain if present
+    for old_entry in hass.config_entries.async_entries(OLD_DOMAIN):
+        if not old_entry.options and not old_entry.data:
+            continue
+        entry_data = {**old_entry.data, **old_entry.options}
+        unique_id = old_entry.unique_id or old_entry.entry_id
+        if any(
+            e.unique_id == unique_id
+            for e in hass.config_entries.async_entries(DOMAIN)
+        ):
+            continue
+        _LOGGER.info(
+            "Migrating legacy config entry '%s' from %s to %s",
+            old_entry.title,
+            OLD_DOMAIN,
+            DOMAIN,
+        )
+        data_to_import = {
+            CONF_NAME: old_entry.title,
+            CONF_UNIQUE_ID: unique_id,
+            **entry_data,
+        }
+        hass.async_create_task(
+            hass.config_entries.flow.async_init(
+                DOMAIN,
+                context={"source": SOURCE_IMPORT},
+                data=data_to_import,
+            )
+        )
+        hass.async_create_task(
+            hass.config_entries.async_remove(old_entry.entry_id)
+        )
 
     async def async_get_loc_elev(event: Event | None = None) -> None:
         """Get HA Location object & elevation."""

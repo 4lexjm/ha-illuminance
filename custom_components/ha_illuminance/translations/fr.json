@@ -1,0 +1,57 @@
+{
+    "title": "Éclairement",
+    "config": {
+        "step": {
+            "options": {
+                "title": "Options d'éclairement",
+                "description": "Le diviseur par défaut est 1 si aucune source météo n'est sélectionnée, et 10 si une source est sélectionnée.",
+                "data": {
+                    "mode": "Mode",
+                    "entity_id": "Source de données météo",
+                    "scan_interval": "Période de mise à jour en minutes",
+                    "fallback": "Diviseur d'éclairement en l'absence de données météo"
+                }
+            },
+            "name": {
+                "title": "Nom",
+                "data": {
+                    "name": "Nom"
+                }
+            }
+        }
+    },
+    "device": {
+        "service": {
+            "name": "Éclairement"
+        }
+    },
+    "options": {
+        "step": {
+            "options": {
+                "title": "Options d'éclairement",
+                "description": "Le diviseur par défaut est 1 si aucune source météo n'est sélectionnée, et 10 si une source est sélectionnée.",
+                "data": {
+                    "mode": "Mode",
+                    "entity_id": "Source de données météo",
+                    "scan_interval": "Période de mise à jour en minutes",
+                    "fallback": "Diviseur d'éclairement en l'absence de données météo"
+                }
+            }
+        }
+    },
+    "selector": {
+        "mode": {
+            "options": {
+                "normal": "Normal",
+                "simple": "Simple",
+                "irradiance": "Irradiation"
+            }
+        }
+    },
+    "services": {
+        "reload": {
+            "name": "Recharger",
+            "description": "Recharge l'intégration Illuminance depuis la configuration YAML."
+        }
+    }
+}
