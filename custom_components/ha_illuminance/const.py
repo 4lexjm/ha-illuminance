@@ -1,4 +1,5 @@
 """Constants for Illuminance integration."""
+
 from datetime import timedelta
 
 DOMAIN = "ha_illuminance"

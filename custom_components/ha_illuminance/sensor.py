@@ -2,23 +2,25 @@
 
 A Sensor platform that estimates outdoor illuminance from current weather conditions.
 """
+
 from __future__ import annotations
 
 import asyncio
+import logging
+import re
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from enum import Enum, IntEnum, auto
 from functools import cached_property  # pylint: disable=hass-deprecated-import
-import logging
 from math import asin, cos, exp, radians, sin
-import re
 from typing import Any, cast
 
+import homeassistant.helpers.config_validation as cv
+import homeassistant.util.dt as dt_util
+import voluptuous as vol
 from astral import Elevation
 from astral.location import Location
-import voluptuous as vol
-
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -61,10 +63,8 @@ from homeassistant.core import (
     State,
     callback,
 )
-import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback, EntityPlatform
 from homeassistant.helpers.event import async_track_state_change_event
-import homeassistant.util.dt as dt_util
 from homeassistant.util.hass_dict import HassKey
 
 from .const import (
@@ -206,9 +206,7 @@ def _illumiance(elev: Num) -> float:
     x = 753.66156
     s = asin(x * cos(elev_rad) / (x + 1))
     m = x * (cos(s) - u) + cos(s)
-    m = exp(-0.2 * m) * u + 0.0289 * exp(-0.042 * m) * (
-        1 + (elev + 90) * u / 57.29577951
-    )
+    m = exp(-0.2 * m) * u + 0.0289 * exp(-0.042 * m) * (1 + (elev + 90) * u / 57.29577951)
     return 133775 * m
 
 
@@ -299,9 +297,7 @@ class IlluminanceSensor(SensorEntity):
 
         # When source entity changes check to see if we should update.
         self.async_on_remove(
-            async_track_state_change_event(
-                hass, self.weather_entity, sensor_state_listener
-            )
+            async_track_state_change_event(hass, self.weather_entity, sensor_state_listener)
         )
 
     async def async_update(self) -> None:
@@ -364,9 +360,7 @@ class IlluminanceSensor(SensorEntity):
                         self.weather_entity,
                     )
                 except ValueError:
-                    attribution = cast(
-                        str | None, entity_state.attributes.get(ATTR_ATTRIBUTION)
-                    )
+                    attribution = cast(str | None, entity_state.attributes.get(ATTR_ATTRIBUTION))
                     self._get_mappings(attribution, entity_state.domain)
                     if self._entity_status == EntityStatus.OK_CONDITION:
                         _LOGGER.info(

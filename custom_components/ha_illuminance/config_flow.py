@@ -1,12 +1,12 @@
 """Config flow for Illuminance integration."""
+
 from __future__ import annotations
 
 from abc import abstractmethod
 from datetime import timedelta
-from typing import Any, cast
+from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.config_entries import (
     SOURCE_IMPORT,
     ConfigEntry,
@@ -75,9 +75,7 @@ class IlluminanceFlow(ConfigEntryBaseFlow):
                     EntitySelectorConfig(domain=["sensor", "weather"])
                 ),
                 vol.Optional(CONF_FALLBACK): NumberSelector(
-                    NumberSelectorConfig(
-                        min=1, max=10, step="any", mode=NumberSelectorMode.BOX
-                    )
+                    NumberSelectorConfig(min=1, max=10, step="any", mode=NumberSelectorMode.BOX)
                 ),
             }
         )
@@ -85,9 +83,7 @@ class IlluminanceFlow(ConfigEntryBaseFlow):
             data_schema,
             {
                 CONF_MODE: self.options.get(CONF_MODE, MODES[0]),
-                CONF_SCAN_INTERVAL: self.options.get(
-                    CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_MIN
-                ),
+                CONF_SCAN_INTERVAL: self.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_MIN),
             },
         )
         if (entity_id := self.options.get(CONF_ENTITY_ID)) is not None:
@@ -101,9 +97,7 @@ class IlluminanceFlow(ConfigEntryBaseFlow):
         return self.async_show_form(step_id="options", data_schema=data_schema)
 
     @abstractmethod
-    async def async_step_done(
-        self, _: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_done(self, _: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Finish the flow."""
 
 
@@ -144,41 +138,29 @@ class IlluminanceConfigFlow(ConfigFlow, IlluminanceFlow, domain=DOMAIN):
         title = data.pop(CONF_NAME)
         # Convert from timedelta to float in minutes if needed.
         if isinstance(data[CONF_SCAN_INTERVAL], timedelta):
-            data[CONF_SCAN_INTERVAL] = (
-                data[CONF_SCAN_INTERVAL].total_seconds() / 60
-            )
+            data[CONF_SCAN_INTERVAL] = data[CONF_SCAN_INTERVAL].total_seconds() / 60
         else:
             data[CONF_SCAN_INTERVAL] = float(data[CONF_SCAN_INTERVAL])
         if existing_entry := await self.async_set_unique_id(data.pop(CONF_UNIQUE_ID)):
-            self.hass.config_entries.async_update_entry(
-                existing_entry, title=title, options=data
-            )
+            self.hass.config_entries.async_update_entry(existing_entry, title=title, options=data)
             return self.async_abort(reason="already_configured")
 
         return self.async_create_entry(title=title, data={}, options=data)
 
-    async def async_step_user(
-        self, _: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_user(self, _: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Start user config flow."""
         return await self.async_step_name()
 
-    async def async_step_name(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_name(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Get name."""
         if user_input is not None:
             self._name = user_input[CONF_NAME]
             return await self.async_step_options()
 
         schema = {vol.Required(CONF_NAME, default=self._name): TextSelector()}
-        return self.async_show_form(
-            step_id="name", data_schema=vol.Schema(schema), last_step=False
-        )
+        return self.async_show_form(step_id="name", data_schema=vol.Schema(schema), last_step=False)
 
-    async def async_step_done(
-        self, _: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_done(self, _: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Finish the flow."""
         return self.async_create_entry(title=self._name, data={}, options=self.options)
 
@@ -186,8 +168,6 @@ class IlluminanceConfigFlow(ConfigFlow, IlluminanceFlow, domain=DOMAIN):
 class IlluminanceOptionsFlow(OptionsFlowWithConfigEntry, IlluminanceFlow):
     """Illuminance integration options flow."""
 
-    async def async_step_done(
-        self, _: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_done(self, _: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Finish the flow."""
         return self.async_create_entry(title="", data=self.options or {})

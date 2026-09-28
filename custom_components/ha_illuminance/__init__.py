@@ -1,13 +1,13 @@
 """Illuminance Sensor."""
+
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Coroutine
 import logging
+from collections.abc import Coroutine
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import (
     CONF_NAME,
@@ -17,7 +17,8 @@ from homeassistant.const import (
     Platform,
 )
 from homeassistant.core import Event, HomeAssistant, ServiceCall
-from homeassistant.helpers import config_validation as cv, device_registry as dr
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.reload import async_integration_yaml_config
 from homeassistant.helpers.service import async_register_admin_service
 from homeassistant.helpers.sun import get_astral_location
@@ -57,10 +58,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             continue
         entry_data = {**old_entry.data, **old_entry.options}
         unique_id = old_entry.unique_id or old_entry.entry_id
-        if any(
-            e.unique_id == unique_id
-            for e in hass.config_entries.async_entries(DOMAIN)
-        ):
+        if any(e.unique_id == unique_id for e in hass.config_entries.async_entries(DOMAIN)):
             continue
         _LOGGER.info(
             "Migrating legacy config entry '%s' from %s to %s",
@@ -80,9 +78,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 data=data_to_import,
             )
         )
-        hass.async_create_task(
-            hass.config_entries.async_remove(old_entry.entry_id)
-        )
+        hass.async_create_task(hass.config_entries.async_remove(old_entry.entry_id))
 
     async def async_get_loc_elev(event: Event | None = None) -> None:
         """Get HA Location object & elevation."""
@@ -102,9 +98,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
         await hass.async_add_executor_job(get_loc_elev)
 
-    async def process_config(
-        config: ConfigType | None, run_immediately: bool = True
-    ) -> None:
+    async def process_config(config: ConfigType | None, run_immediately: bool = True) -> None:
         """Process illuminance config."""
         if not config or not (configs := config.get(DOMAIN)):
             configs = []
