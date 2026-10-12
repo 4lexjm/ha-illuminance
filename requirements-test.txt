@@ -1,0 +1,5 @@
+astral
+pytest
+pytest-asyncio
+ruff
+voluptuous

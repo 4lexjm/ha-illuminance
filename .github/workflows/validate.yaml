@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ruff
+          pip install -r requirements-test.txt
 
       - name: Run Ruff Linter
         run: ruff check .
@@ -57,7 +57,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio voluptuous astral
+          pip install -r requirements-test.txt
 
       - name: Run Pytest
         env:
