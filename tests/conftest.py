@@ -228,6 +228,15 @@ def _setup_homeassistant_mock():
         def async_get_device(self, identifiers):
             return self.devices.get(next(iter(identifiers), None))
 
+        def async_get_devices(self, identifiers=None):
+            if identifiers is None:
+                return list(self.devices.values())
+            res = []
+            for ident in identifiers:
+                if ident in self.devices:
+                    res.append(self.devices[ident])
+            return res
+
         def async_remove_device(self, device_id):
             to_del = [
                 k

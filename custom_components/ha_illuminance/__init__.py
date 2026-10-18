@@ -49,7 +49,11 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     # Clean up legacy services/devices from previous versions if they exist.
     dev_reg = dr.async_get(hass)
     for dom in (DOMAIN, OLD_DOMAIN):
-        if device := dev_reg.async_get_device({(dom, dom)}):
+        if hasattr(dev_reg, "async_get_devices"):
+            devices = dev_reg.async_get_devices(identifiers={(dom, dom)})
+        else:
+            devices = [d] if (d := dev_reg.async_get_device({(dom, dom)})) else []
+        for device in devices:
             dev_reg.async_remove_device(device.id)
 
     # Migrate legacy config entries from previous domain if present
